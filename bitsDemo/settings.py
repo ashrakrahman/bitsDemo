@@ -118,3 +118,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+GITHUB_CLIENT_ID = "5a4784fe30a24950df66"
+GITHUB_CLIENT_SECRET_ID = "f09a4a11521c4e4da9dca5e5078fcdf54afa7e67"
