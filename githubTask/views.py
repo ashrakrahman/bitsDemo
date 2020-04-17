@@ -21,7 +21,7 @@ GITHUB_ACCESS_TOKEN_API_ENDPOINT = 'https://github.com/login/oauth/access_token'
 GITHUB_USER_API_ENDPOINT = 'https://api.github.com/user'
 
 
-@login_required(login_url='/login/')
+@login_required(login_url='/accounts/login/')
 def github_task_view(request):
     url = get_github_authorization_url()
     return render(request, 'github_task_view.html', {
@@ -30,7 +30,7 @@ def github_task_view(request):
     })
 
 
-@login_required(login_url='/login/')
+@login_required(login_url='/accounts/login/')
 def process_callback_view(request):
     url = get_github_authorization_url()
     access_code = request.GET.get("code")
@@ -82,7 +82,11 @@ def getGithubRepoListByUser(request):
 
     authorised_user_api_list = json.loads(req.content)
 
-    repo_api_url = authorised_user_api_list['repos_url']
+    if 'repos_url' in authorised_user_api_list:
+        repo_api_url = authorised_user_api_list['repos_url']
+    else:
+        repo_api_url = ""
+        return redirect('/task/github/')
 
     repo_response = requests.get(url=repo_api_url, headers={}, verify=False)
     repo_result = json.loads(repo_response.content)
