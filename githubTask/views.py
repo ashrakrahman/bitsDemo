@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from django.conf import settings as conf_settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import (HttpResponseRedirect, HttpResponse)
 from .models import UserToken
 import requests
 import json
@@ -40,11 +41,9 @@ def process_callback_view(request):
         'redirect_uri': CALLBACK_URL,
         'state': STATE
     }
-
     # sending post request and saving response as response object
     r = requests.post(url=GITHUB_ACCESS_TOKEN_API_ENDPOINT, headers={
                       'Accept': 'application/json'}, data=data)
-
     response_payload = json.loads(r.content)
 
     status = "1"
@@ -66,18 +65,37 @@ def process_callback_view(request):
             token=access_token, tokenuserid=user_id)
         user_token_instance.save()
 
-    # headers = {'Authorization': 'Token ' + access_token}
-    # req = requests.get(url=GITHUB_USER_API_ENDPOINT,
-    #                    headers=headers, verify=False)
-
-    # authorised_user_api_list = json.loads(req.content)
-
-    # repo_api = authorised_user_api_list['repos_url']
-
     return render(request, 'github_task_view.html', {
         'status': status,
         'url': url
     })
+
+
+def getGithubRepoListByUser(request):
+    user_id = request.user.id
+    queryset = UserToken.objects.filter(tokenuserid=user_id)
+    access_token = str(queryset[0])
+
+    headers = {'Authorization': 'Token ' + access_token}
+    req = requests.get(url=GITHUB_USER_API_ENDPOINT,
+                       headers=headers, verify=False)
+
+    authorised_user_api_list = json.loads(req.content)
+
+    repo_api_url = authorised_user_api_list['repos_url']
+
+    repo_response = requests.get(url=repo_api_url, headers={}, verify=False)
+    repo_result = json.loads(repo_response.content)
+
+    result = []
+    for item in repo_result:
+        info_object = {}
+        info_object["id"] = item["id"]
+        info_object["repo_name"] = item["name"]
+        info_object["html_url"] = item["html_url"]
+        result.append(info_object)
+
+    return HttpResponse(json.dumps(result))
 
 
 def get_github_authorization_url():
