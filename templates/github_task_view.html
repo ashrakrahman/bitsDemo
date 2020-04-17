@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+    {% block titel %}
+        Github Task
+    {% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <h1>Github Task</h1>
+        {% if status == "1" %}  
+            <h4> Status :<p style="color:green;"> <strong> Connected </strong> </p> </h4>
+        {% endif %}
+
+        {% if status == "0" %}  
+            <h4> Status : <p style="color:red;"> Not connected </p> </h4>
+        {% endif %}
+        <a href="{{url}}"> Connect Your Github Account</a>
+    </div>
+
+{% endblock %}
+
+
+
+
+
