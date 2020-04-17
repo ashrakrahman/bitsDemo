@@ -1,0 +1,46 @@
+{% include 'snippets/css.html' %}
+{% include 'snippets/js.html' %}
+
+<head>
+<style>
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #F2F2F2 ;
+}
+
+li {
+    float: left;
+}
+
+li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+a:hover:not(.active) {
+    background-color: lightskyblue;
+}
+
+</style>
+</head>
+<body>
+
+<ul>
+    <div class="float">
+        <li><a href="/" style="text-decoration:none"> Home</a></li>
+        <li><a href="/tasks/" style="text-decoration:none"> Task</a></li>
+
+        <div class="float-right">
+            <li><a href="/about/" style="text-decoration:none"> About</a></li>
+            <li><a href="/logout/" style="text-decoration:none" > Log Out</a></li>
+        </div>
+  </div>
+</ul>
+
+</body>

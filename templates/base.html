@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>
+    {% block titel %}
+    {% endblock %}
+</title>
+    {% include 'snippets/css.html' %}
+    {% include 'snippets/js.html' %}
+    <body>
+    <div class="container">
+        <h1>
+            bitsDemo
+        </h1>
+        <div>
+            {% include 'snippets/nav.html' %}
+        </div>
+
+        <br>
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    </body>
+
+</html>
