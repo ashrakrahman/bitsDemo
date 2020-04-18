@@ -3,7 +3,7 @@ from django.conf import settings as conf_settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponseRedirect, HttpResponse)
-from .models import UserToken
+from .models import UserToken, UserWebHookInfo
 from pyngrok import ngrok
 import requests
 import json
@@ -108,6 +108,13 @@ def github_webhook_view(request, repo_name, user):
         webhook_id = response_payload['id']
         webhook_url = response_payload['url']
         message = "Created Web hook for repo : "+repo_name
+        user_web_hook_instance = UserWebHookInfo(
+            web_hook_id=webhook_id,
+            web_hook_url=webhook_url,
+            github_user_name=user,
+            repo_name=repo_name,
+            system_user_id=user_id)
+        user_web_hook_instance.save()
     else:
         message = " For repo: "+repo_name+" " + \
             response_payload['errors'][0]['message']
