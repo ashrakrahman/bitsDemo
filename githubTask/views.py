@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponseRedirect, HttpResponse)
 from .models import UserToken, UserWebHookInfo
 from pyngrok import ngrok
+from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
 import random
@@ -23,7 +24,10 @@ GITHUB_USER_API_ENDPOINT = 'https://api.github.com/user'
 GITHUB_WEBHOOK_API_ENDPOINT = 'https://api.github.com/repos'
 
 # Replacement of localhost by ngrok public url
-GITHUB_WEBHOOK_CALLBACK_URL = 'http://db0b5d6b.ngrok.io/task/webwhook/callback'
+# Hard coded - need to resolve
+# To resolve we need live web server deployment & use that domain name
+NGROK_URL = conf_settings.NGROK_DOMAIN_NAME
+GITHUB_WEBHOOK_CALLBACK_URL = 'http://'+NGROK_URL+'/task/webwhook/callback/'
 
 
 @login_required(login_url='/accounts/login/')
@@ -121,6 +125,26 @@ def github_webhook_view(request, repo_name, user):
 
     return render(request, 'github_webhook_view.html', {
         'message': message
+    })
+
+
+@csrf_exempt
+def github_webhook_callback(request):
+    payload = json.loads(request.body)
+    data_id = ""
+    data_info = ""
+    if "head_commit" in payload:
+        data_id = "push event"
+        data_info = str(payload["head_commit"]["url"])
+    if "pull_request" in payload:
+        data_id = "pull event"
+        data_info = str(payload["pull_request"]["url"])
+
+    print data_id
+    print data_info
+
+    return render(request, 'github_webhook_view.html', {
+        'message': "ok"
     })
 
 
