@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponseRedirect, HttpResponse)
 from .models import UserToken, UserWebHookInfo, GithubWebHookEvent
 from pyngrok import ngrok
+from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
@@ -187,6 +188,21 @@ def getGithubRepoListByUser(request):
     return HttpResponse(json.dumps(result))
 
 
+def getGithubWebHookListByUser(request):
+    user_id = request.user.id
+    access_token = getUserAccessToken(user_id)
+    github_username = getGitHubUserNameByAccessToken(access_token)
+    instance = GithubWebHookEvent.objects.filter(
+        github_user_name=github_username)
+    instance_list = serializers.serialize('json', instance)
+    return HttpResponse(instance_list)
+
+
+def webhook_event_list(request):
+    return render(request, 'webhook_event_list.html', {
+    })
+
+
 def getGithubAuthorizationUrl():
     url = GITHUB_AUTH_API_ENDPOINT+"?client_id=" + CLIENT_ID+"&client_secret=" + \
         CLIENT_SECRET_ID+"&redirect_uri=" + CALLBACK_URL+"&scope="+SCOPE+"&state="+STATE
@@ -197,3 +213,12 @@ def getUserAccessToken(user_id):
     queryset = UserToken.objects.filter(tokenuserid=user_id)
     access_token = str(queryset[0])
     return access_token
+
+
+def getGitHubUserNameByAccessToken(access_token):
+    headers = {'Authorization': 'Token ' + access_token}
+    req = requests.get(url=GITHUB_USER_API_ENDPOINT,
+                       headers=headers, verify=False)
+
+    result = json.loads(req.content)
+    return str(result["login"])

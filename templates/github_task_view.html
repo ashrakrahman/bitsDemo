@@ -58,9 +58,6 @@
                 type: 'GET',
                 async:false,
                 dataType: 'json',
-                beforeSend: function () {
-                    $('#container').show(); 
-                },
                 success: function (result) {
                     for (var idx in result) {
                         tbody +=

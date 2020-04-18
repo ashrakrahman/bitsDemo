@@ -1,0 +1,71 @@
+
+{% extends "base.html" %}
+    {% block titel %}
+        Github Event
+    {% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <h2> List of Your Github Web Hook Event </h2>
+        <div class="col-md-12">
+            <table id="example" class="table table-striped table-bordered" style="width:100%">
+            <p id="info" style="color:red;"> Collecting Data. Please wait... </p> <br>
+            <thead>
+                <tr>
+                    <th>Github User Name</th>
+                    <th>Repositoty Name</th>
+                    <th>Event Name</th>
+                    <th>Event Info</th>
+                    <th>Event Time</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        
+        $(document).ready(function(){
+           getGithubWebHookList();
+
+        });
+
+        function getGithubWebHookList(){
+            var tbody = '';
+            $.ajax({
+                url: '/task/getGithubWebHookListByUser/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (result) {
+                    console.log(result);
+                    for (var idx in result) {
+                        tbody +=
+                              '                  <tr>\n'+
+                              '                    <td>'+result[idx].fields.github_user_name+'</td>\n'+
+                              '                    <td>'+result[idx].fields.repo_name+'</td>\n'+
+                              '                    <td>'+result[idx].fields.even_id+'</td>\n'+
+                              '                    <td> <a href="'+result[idx].fields.event_url+'">Event Link </a></td>\n'+
+                              '                    <td>'+result[idx].fields.created_at+'</td>\n'+
+                              '                  </tr>\n';
+
+                    }
+                    $("#example").find('tbody').html(tbody);
+                    $('#info').hide();
+
+                }
+            });
+        }
+
+
+    </script>
+
+{% endblock %}
+
+
+
+
+

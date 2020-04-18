@@ -8,8 +8,12 @@ urlpatterns = [
         views.github_webhook_view, name='github_webhook_view'),
     url(r'^webwhook/callback',
         views.github_webhook_callback, name='github_webhook_callback'),
+    url(r'^webwhook/webhook_event_list',
+        views.webhook_event_list, name='webhook_event_list'),
     url(r'^process/callback/', views.process_callback_view,
         name='process_callback_view'),
     url(r'^getGithubRepoListByUser/', views.getGithubRepoListByUser,
         name='getGithubRepoListByUser'),
+    url(r'^getGithubWebHookListByUser/', views.getGithubWebHookListByUser,
+        name='getGithubWebHookListByUser'),
 ]
