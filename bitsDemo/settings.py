@@ -25,8 +25,10 @@ SECRET_KEY = '%cb35@-5g6qa1#0!mowan$7fod3^n8ulmi^ah3+3!^b)4-%16='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+NGROK_DOMAIN_NAME = 'ba2fde99.ngrok.io'
+
 # use ngrok url to create the public url
-ALLOWED_HOSTS = ['db0b5d6b.ngrok.io', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [NGROK_DOMAIN_NAME, '127.0.0.1', 'localhost']
 
 
 # Application definition
