@@ -24,13 +24,12 @@
         <div class="">
             <table id="example" class="table table-striped table-bordered" style="width:100%">
             <p id="info" style="color:red;"> Collecting Data. Please wait... </p> <br>
-            <button type="button" id="submitRepo" class="btn btn-primary" style="cursor:pointer;" onClick="submitRepoId()" data-dismiss="modal">Submit Your Selection</button> <br><br>
             <thead>
                 <tr>
-                    <th>Select Repo</th>
                     <th>Repo ID</th>
                     <th>Repositoty Name</th>
                     <th>Repositoty URL</th>
+                    <th>Action - Hook</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,10 +65,10 @@
                     for (var idx in result) {
                         tbody +=
                               '                  <tr>\n'+
-                              '                    <td style="padding-left:40px">'+ '<input type="radio" id="repo_'+ result[idx].id+' value="'+ result[idx].id+'" name="repo_id" ></td>\n'+
                               '                    <td>'+result[idx].id+'</td>\n'+
                               '                    <td>'+result[idx].repo_name+'</td>\n'+
                               '                    <td>'+result[idx].html_url+'</td>\n'+
+                              '                    <td style="width:200px">'+ '<a href="/task/webwhook/'+ result[idx].repo_name+'/'+result[idx].user+'" > Set Github Hook</a></td>\n'+
                               '                  </tr>\n';
 
                     }
@@ -80,9 +79,6 @@
             });
         }
 
-        function submitRepoId (){
-            alert("OK");
-        }
 
     </script>
 
