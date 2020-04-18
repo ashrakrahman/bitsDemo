@@ -8,11 +8,29 @@ import json
 
 
 def home(request):
+    """
+        Home Page
+
+        Args:
+            request (HttpRequest): GET Request.
+
+        Returns:
+            TemplateResponse : Returns Data to home template 
+    """
     return render(request, 'home.html', {
     })
 
 
 def regstration_view(request):
+    """
+        User Registration method
+
+        Args:
+            request (HttpRequest): GET/POST Request.
+
+        Returns:
+            TemplateResponse : Returns Data to registration template 
+    """
     form = UserRegistrationForm(request.POST or None)
     titel = "Registration Form"
     next = request.GET.get('next')
@@ -35,6 +53,15 @@ def regstration_view(request):
 
 
 def login_view(request):
+    """
+        User Login method
+
+        Args:
+            request (HttpRequest): GET/POST Request.
+
+        Returns:
+            HttpResponseRedirect : If valid User redirect to home url 
+    """
     form = UserLoginForm(request.POST or None)
     titel = "Login"
     next = request.GET.get('next')
@@ -58,5 +85,14 @@ def login_view(request):
 
 
 def logout_view(request):
+    """
+        User Logout method
+
+        Args:
+            request (HttpRequest): GET Request.
+
+        Returns:
+            HttpResponseRedirect : If log out fires redirect to login url 
+    """
     logout(request)
     return redirect("/accounts/login/")

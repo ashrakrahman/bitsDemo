@@ -33,6 +33,15 @@ GITHUB_WEBHOOK_CALLBACK_URL = 'http://'+NGROK_URL+'/task/webwhook/callback/'
 
 @login_required(login_url='/accounts/login/')
 def github_task_view(request):
+    """
+        Github Task View Page
+
+        Args:
+            request (HttpRequest): GET Request.
+
+        Returns:
+            TemplateResponse : Returns Data to github_task_view template 
+    """
     url = getGithubAuthorizationUrl()
     return render(request, 'github_task_view.html', {
         'status': "0",
@@ -42,6 +51,16 @@ def github_task_view(request):
 
 @login_required(login_url='/accounts/login/')
 def process_callback_view(request):
+    """
+        Github Oauth Callback Function for User Access Token
+
+        Args:
+            request (HttpRequest): Request from Github.
+
+        Returns:
+            TemplateResponse : Returns Data to github_task_view template or
+            HttpResponseRedirect : If nothing nothing found
+    """
     url = getGithubAuthorizationUrl()
     access_code = request.GET.get("code")
     data = {
@@ -83,6 +102,15 @@ def process_callback_view(request):
 
 @login_required(login_url='/accounts/login/')
 def github_webhook_view(request, repo_name, user):
+    """
+        Create Github Web Hook for a Repository
+
+        Args:
+            request (HttpRequest): GET from Table Url.
+
+        Returns:
+            TemplateResponse : Returns Success or Error message to github_webhook_view template
+    """
     # Create Web hook for repo_id
     webhook_create_url = GITHUB_WEBHOOK_API_ENDPOINT+'/'+user+'/'+repo_name+'/hooks'
     data = {
@@ -103,7 +131,6 @@ def github_webhook_view(request, repo_name, user):
     access_token = getUserAccessToken(user_id)
 
     headers = {'Authorization': 'Token ' + access_token}
-
     r = requests.post(url=webhook_create_url, headers=headers, data=data_json)
 
     response_payload = json.loads(r.content)
@@ -131,6 +158,16 @@ def github_webhook_view(request, repo_name, user):
 
 @csrf_exempt
 def github_webhook_callback(request):
+    """
+        This method is called by GitHub when a pull request/push request created by a User.
+        Have to set a Web hook before callback function
+
+        Args:
+            request (HttpRequest): Request from Github.
+
+        Returns:
+            HttpResponse : Returns Success or Error message to server Log
+    """
     payload = json.loads(request.body)
     data_id = ""
     data_info = ""
@@ -157,6 +194,16 @@ def github_webhook_callback(request):
 
 
 def getGithubRepoListByUser(request):
+    """
+        An API method to get All github repos by github user with access token
+
+        Args:
+            request (HttpRequest): GET Request from Any Entity.
+
+        Returns:
+            HttpResponse : Returns a list of user Repository
+            HttpResponseRedirect : If nothing nothing found
+    """
     user_id = request.user.id
     access_token = getUserAccessToken(user_id)
 
@@ -189,6 +236,15 @@ def getGithubRepoListByUser(request):
 
 
 def getGithubWebHookListByUser(request):
+    """
+        An API method to get All github webhook event list from system database by github user
+
+        Args:
+            request (HttpRequest): GET Request from Any Entity.
+
+        Returns:
+            HttpResponse : Returns a list of github webhook event
+    """
     user_id = request.user.id
     access_token = getUserAccessToken(user_id)
     github_username = getGitHubUserNameByAccessToken(access_token)
@@ -199,6 +255,15 @@ def getGithubWebHookListByUser(request):
 
 
 def webhook_event_list(request):
+    """
+        Github Event List View Page
+
+        Args:
+            request (HttpRequest): GET Request.
+
+        Returns:
+            TemplateResponse : Returns Data to webhook_event_list template 
+    """
     return render(request, 'webhook_event_list.html', {
     })
 
