@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponseRedirect, HttpResponse)
 from .models import UserToken
+from pyngrok import ngrok
 import requests
 import json
 import random
@@ -19,11 +20,15 @@ STATE = "letsgeneratearandomtext"
 GITHUB_AUTH_API_ENDPOINT = 'https://github.com/login/oauth/authorize'
 GITHUB_ACCESS_TOKEN_API_ENDPOINT = 'https://github.com/login/oauth/access_token'
 GITHUB_USER_API_ENDPOINT = 'https://api.github.com/user'
+GITHUB_WEBHOOK_API_ENDPOINT = 'https://api.github.com/repos'
+
+# Replacement of localhost by ngrok public url
+GITHUB_WEBHOOK_CALLBACK_URL = 'http://db0b5d6b.ngrok.io/task/webwhook/callback'
 
 
 @login_required(login_url='/accounts/login/')
 def github_task_view(request):
-    url = get_github_authorization_url()
+    url = getGithubAuthorizationUrl()
     return render(request, 'github_task_view.html', {
         'status': "0",
         'url': url
@@ -32,7 +37,7 @@ def github_task_view(request):
 
 @login_required(login_url='/accounts/login/')
 def process_callback_view(request):
-    url = get_github_authorization_url()
+    url = getGithubAuthorizationUrl()
     access_code = request.GET.get("code")
     data = {
         'client_id': CLIENT_ID,
@@ -71,10 +76,50 @@ def process_callback_view(request):
     })
 
 
+@login_required(login_url='/accounts/login/')
+def github_webhook_view(request, repo_name, user):
+    # Create Web hook for repo_id
+    webhook_create_url = GITHUB_WEBHOOK_API_ENDPOINT+'/'+user+'/'+repo_name+'/hooks'
+    data = {
+        "name": "web",
+        "events": [
+            "push",
+            "pull_request"
+        ],
+        "config": {
+            "url": GITHUB_WEBHOOK_CALLBACK_URL,
+            "content_type": "json",
+            "insecure_ssl": "0"
+        }
+    }
+
+    data_json = json.dumps(data)
+    user_id = request.user.id
+    access_token = getUserAccessToken(user_id)
+
+    headers = {'Authorization': 'Token ' + access_token}
+
+    r = requests.post(url=webhook_create_url, headers=headers, data=data_json)
+
+    response_payload = json.loads(r.content)
+    status_code = str(r.status_code)
+    print response_payload
+    if status_code == "201":
+        webhook_id = response_payload['id']
+        webhook_url = response_payload['url']
+        message = "Created Web hook for repo : "+repo_name
+    else:
+        message = " For repo: "+repo_name+" " + \
+            response_payload['errors'][0]['message']
+
+    return render(request, 'github_webhook_view.html', {
+        'message': message
+    })
+
+
 def getGithubRepoListByUser(request):
     user_id = request.user.id
-    queryset = UserToken.objects.filter(tokenuserid=user_id)
-    access_token = str(queryset[0])
+    access_token = getUserAccessToken(user_id)
 
     headers = {'Authorization': 'Token ' + access_token}
     req = requests.get(url=GITHUB_USER_API_ENDPOINT,
@@ -88,7 +133,8 @@ def getGithubRepoListByUser(request):
         repo_api_url = ""
         return redirect('/task/github/')
 
-    repo_response = requests.get(url=repo_api_url, headers={}, verify=False)
+    repo_response = requests.get(
+        url=repo_api_url, headers={}, verify=False)
     repo_result = json.loads(repo_response.content)
 
     result = []
@@ -97,13 +143,19 @@ def getGithubRepoListByUser(request):
         info_object["id"] = item["id"]
         info_object["repo_name"] = item["name"]
         info_object["html_url"] = item["html_url"]
+        info_object["user"] = item["owner"]["login"]
         result.append(info_object)
 
     return HttpResponse(json.dumps(result))
 
 
-def get_github_authorization_url():
-    url = GITHUB_AUTH_API_ENDPOINT+"?client_id=" + \
-        CLIENT_ID+"&client_secret="+CLIENT_SECRET_ID+"&redirect_uri=" + \
-        CALLBACK_URL+"&scope="+SCOPE+"&state="+STATE
+def getGithubAuthorizationUrl():
+    url = GITHUB_AUTH_API_ENDPOINT+"?client_id=" + CLIENT_ID+"&client_secret=" + \
+        CLIENT_SECRET_ID+"&redirect_uri=" + CALLBACK_URL+"&scope="+SCOPE+"&state="+STATE
     return url
+
+
+def getUserAccessToken(user_id):
+    queryset = UserToken.objects.filter(tokenuserid=user_id)
+    access_token = str(queryset[0])
+    return access_token
