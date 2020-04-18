@@ -3,7 +3,7 @@ from django.conf import settings as conf_settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import (HttpResponseRedirect, HttpResponse)
-from .models import UserToken, UserWebHookInfo
+from .models import UserToken, UserWebHookInfo, GithubWebHookEvent
 from pyngrok import ngrok
 from django.views.decorators.csrf import csrf_exempt
 import requests
@@ -136,16 +136,23 @@ def github_webhook_callback(request):
     if "head_commit" in payload:
         data_id = "push event"
         data_info = str(payload["head_commit"]["url"])
+        repo_name = str(payload["repository"]["name"])
+        github_user_name = str(payload["repository"]["owner"]["name"])
     if "pull_request" in payload:
         data_id = "pull event"
         data_info = str(payload["pull_request"]["url"])
+        repo_name = str(payload["repository"]["name"])
+        github_user_name = str(payload["repository"]["owner"]["login"])
 
-    print data_id
-    print data_info
-
-    return render(request, 'github_webhook_view.html', {
-        'message': "ok"
-    })
+    github_web_hook_instance = GithubWebHookEvent(
+        even_id=data_id,
+        event_url=data_info,
+        repo_name=repo_name,
+        github_user_name=github_user_name)
+    github_web_hook_instance.save()
+    print "================"
+    print "instance created"
+    return HttpResponse("instance created")
 
 
 def getGithubRepoListByUser(request):
