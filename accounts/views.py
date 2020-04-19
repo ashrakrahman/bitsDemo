@@ -3,10 +3,12 @@ from __future__ import unicode_literals
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from .forms import UserLoginForm, UserRegistrationForm
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 import requests
 import json
 
 
+@login_required(login_url='/accounts/login/')
 def home(request):
     """
         Home Page

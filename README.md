@@ -13,7 +13,7 @@ Work Flow:
 - After connecting with github account users all public repository will be shown in a table view.
 - User can create a Github web hook by selecting any row from the repo table list.
 - After user has successfully create a web hook for a repo, user can show PUSH/PULL events for that repo in the Event List Nav Url
-- By clicking Log in Button user will leave from the bitsDemo system
+- By clicking Log Out Button user will leave from the bitsDemo system
 
 
 !!!!! Thanks for reading !!!!!!!
